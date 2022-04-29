@@ -49,7 +49,21 @@ Route::group(['prefix'=>'v1'], function(){
     Route::get('/portofolio', [BlogController::class, 'portofolio']);
 
 });
+//API route for register new user
+Route::post('/register', [App\Http\Controllers\API\LoginController::class, 'register']);
+//API route for login user
+Route::post('/login', [App\Http\Controllers\API\LoginController::class, 'login']);
 
+//Protecting Routes
+Route::group(['middleware' => ['auth:sanctum']], function () {
+    Route::get('/profile', function(Request $request) {
+        return auth()->user();
+    });
+
+    // API route for logout user
+    Route::post('/logout', [App\Http\Controllers\API\LoginController::class, 'logout']);
+    Route::post('/token', [App\Http\Controllers\API\LoginController::class, 'token']);
+});
 // Route::group(['middleware' => 'auth:api', 'namespace' => 'Api'], function () {
 //     Route::get('/tags', 'ListingController@tags');
 //     Route::get('/categories', 'ListingController@categories');

@@ -7,11 +7,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
+use Laravel\Sanctum\HasApiTokens;
+use Laravel\Sanctum\NewAccessToken;
+// use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class User extends Authenticatable
 {
     // use Notifiable,SoftDeletes;
-    use Notifiable;
+    use HasApiTokens, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -73,5 +76,20 @@ class User extends Authenticatable
     }
     public function group(){
         return $this->belongsTo('App\Group', 'group_id', 'id');
+    }
+
+    //represh token sanctum
+    public function createToken(string $name, $abilities = ['*'])
+    {
+        $token = $this->tokens()->create([
+            'name' => $name,
+            'token' => Hash('sha256', $plainTextToken = Str::random(40)),
+            'abilities' => $abilities,
+            'expired_at' => now()->addHours(3)  
+        ]);
+
+        // return $token;
+        // return new NewAccessToken($token, $token->getKey().'|'.$plainTextToken);
+        return new NewAccessToken($token, $plainTextToken);
     }
 }
