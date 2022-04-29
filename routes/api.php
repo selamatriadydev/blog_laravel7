@@ -61,8 +61,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     });
 
     // API route for logout user
+    Route::post('/token', [App\Http\Controllers\API\LoginController::class, 'token_represh']);
     Route::post('/logout', [App\Http\Controllers\API\LoginController::class, 'logout']);
-    Route::post('/token', [App\Http\Controllers\API\LoginController::class, 'token']);
 });
 // Route::group(['middleware' => 'auth:api', 'namespace' => 'Api'], function () {
 //     Route::get('/tags', 'ListingController@tags');

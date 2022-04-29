@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use App\User;
+use App\PersonalAccessToken;
 use Auth;
 
 class LoginController extends Controller
@@ -29,7 +30,7 @@ class LoginController extends Controller
             'password' => Hash::make($request->password)
          ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $token = $user->createToken('auth_token_blog')->plainTextToken;
 
         return response()
             ->json(['data' => $user,'access_token' => $token, 'token_type' => 'Bearer', ]);
@@ -52,7 +53,7 @@ class LoginController extends Controller
 
         $user = User::where('email', $request['email'])->firstOrFail();
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $token = $user->createToken('auth_token_blog')->plainTextToken;
 
         return response()
             ->json(['message' => 'Hi '.$user->name.', welcome to home','access_token' => $token, 'token_type' => 'Bearer', ]);
@@ -68,17 +69,30 @@ class LoginController extends Controller
         ];
     }
     //represh token
-    public function token(Request $request) 
+    public function token_represh(Request $request) 
     {
-        if (!Auth::attempt($request->only(['email', 'password']))) {
-            abort(403);
-        }
-        
-        $token = auth()->user()->createToken('auth_token');
-        return response()->json([
-            'token' => $token->plainTextToken,
-            'expired_at' => $token->accessToken->expired_at
+        $validator = Validator::make($request->all(),[
+            'email' => 'required|string|email|max:255',
+            'password' => 'required|string|min:8'
         ]);
+        if($validator->fails()){
+            return response()->json($validator->errors());       
+        }
+        if (!Auth::guard('web')->attempt($request->only('email', 'password')))
+        {
+            return response()
+                ->json(['message' => 'Unauthorized'], 401);
+        }
+        // $cek_token = Auth::check();
+            $user_name = Auth::guard('web')->user()->name;
+            $token = auth()->user()->createToken('auth_token_blog');
+            return response()->json([
+                'message' => 'Hi '.$user_name.', welcome to home',
+                'token' => $token->plainTextToken,
+                'token_type' => 'Bearer',
+                'expired_at' => $token->accessToken->expired_at,
+            ]);
+        
     }
 
 }

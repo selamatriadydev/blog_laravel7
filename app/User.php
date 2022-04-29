@@ -83,7 +83,7 @@ class User extends Authenticatable
     {
         $token = $this->tokens()->create([
             'name' => $name,
-            'token' => Hash('sha256', $plainTextToken = Str::random(40)),
+            'token' => hash('sha256', $plainTextToken = Str::random(40)),
             'abilities' => $abilities,
             'expired_at' => now()->addHours(3)  
         ]);
