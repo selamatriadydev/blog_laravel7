@@ -56,13 +56,14 @@ Route::post('/login', [App\Http\Controllers\API\LoginController::class, 'login']
 
 //Protecting Routes
 Route::group(['middleware' => ['auth:sanctum']], function () {
-    Route::get('/profile', function(Request $request) {
-        return auth()->user();
-    });
-
+    // Route::get('/profile', function(Request $request) {
+    //     return auth()->user();
+    // });
+    Route::get('/profile', [App\Http\Controllers\API\LoginController::class, 'profil']);
     // API route for logout user
     Route::post('/token', [App\Http\Controllers\API\LoginController::class, 'token_represh']);
     Route::post('/logout', [App\Http\Controllers\API\LoginController::class, 'logout']);
+    Route::post('/kill_all', [App\Http\Controllers\API\LoginController::class, 'kill_all_user']);
 });
 // Route::group(['middleware' => 'auth:api', 'namespace' => 'Api'], function () {
 //     Route::get('/tags', 'ListingController@tags');

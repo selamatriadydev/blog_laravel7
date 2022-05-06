@@ -42,29 +42,24 @@ class ControllerPost extends Controller
      */
     public function store(Request $request)
     {
-        $post = Post::create([
-            'title'       => $request->title,
-            'slug'       => Str::slug($request->title, '-'),
-            'file_path'       => $request->file('image') ? $request->file('image')->store('images') : 'null',
-            'preview' => $request->preview,
-            'body'        => $request->body ? $request->body : 'kosong',
-            'category_id' => $request->category,
-            'is_published' => $request->status ? $request->status : '0',
-        ]);
-        if($request->tags){
-            $tagList = explode(",", $request->tags);
-            // $tagsId = collect($tagList)->each(function ($tag) {
-            //   return   Tag::firstOrCreate(['name' => $tag])->id;
-            // });
-            // $post->tags()->attach($idTags);
-            // $idTags = array();
-            foreach($tagList as $tag)
-            {
-                Tag::firstOrCreate(['name' => $tag]);
-                $idTags = Tag::where('name', $tag)->pluck('id')->all();
-                $post->tags()->attach($idTags);
-            }
+        $post = new Post;
+        $post->title = $request->title;
+        $post->slug  = Str::slug($request->title, '-');
+        $post->file_path = $request->file('image') ? $request->file('image')->store('images') : 'null';
+        $post->preview = $request->preview;
+        $post->body = $request->body ? $request->body : 'kosong';
+        $post->category_id = $request->category;
+        $post->is_published = $request->status ? $request->status : '0';
+
+        if ($request->tags) {
+            $tagsarr =array_slice(explode(',',$request->tags),0);
+            $tagsId = collect($tagsarr)->each(function ($tag) {
+                 return   Tag::firstOrCreate(['name' => $tag])->id;
+               });
+            // $post->tags()->attach($tagsId);
+            $post->tags()->sync($tagsId);
         }
+        $post->save();
         flash('Post created successfully.')->success();
 
         return redirect('/admin/posts');
@@ -98,10 +93,10 @@ class ControllerPost extends Controller
         }
 
         $categories = Category::all();
-        // $tags = Tag::pluck('name', 'name')->all();
-        $tags = Tag::pluck('name')->all();
+        $tags = $post->tags()->pluck('name');
+        $tags = json_decode($tags);
         $tags = implode(',',$tags);
-        // dd($post);
+        // dd($tags);
         return view('admin.post.edit', compact('post', 'categories', 'tags'));
     }
 
@@ -126,20 +121,12 @@ class ControllerPost extends Controller
             'is_published' => $request->status ? $request->status : '0',
         ]);
 
-        // $tagsId = collect($request->tags)->map(function ($tag) {
-        //     return Tag::firstOrCreate(['name' => $tag])->id;
-        // });
+        $tagsarr =array_slice(explode(',',$request->tags),0);
+        $tagsId = collect($tagsarr)->map(function ($tag) {
+            return Tag::firstOrCreate(['name' => $tag])->id;
+        });
 
-        // $post->tags()->sync($tagsId);
-        if($request->tags){
-            $tagList = explode(",", $request->tags);
-            foreach($tagList as $tag)
-            {
-                Tag::firstOrCreate(['name' => $tag]);
-                $idTags = Tag::where('name', $tag)->pluck('id')->all();
-                $post->tags()->sync($idTags);
-            }
-        }
+        $post->tags()->sync($tagsId);
         flash('Post updated successfully.')->success();
 
         return redirect('/admin/posts');

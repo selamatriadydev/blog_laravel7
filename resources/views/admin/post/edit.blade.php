@@ -27,7 +27,6 @@
                 <strong>{{ $errors->first('title') }}</strong>
               </span>
           </div>
-
           <div class="form-group{{ $errors->has('tag') ? ' has-error' : '' }}">
             <label>Tag</label>
             <input type="text" class="form-control" name="tags" data-role="tagsinput" value="{{ $tags }}" >

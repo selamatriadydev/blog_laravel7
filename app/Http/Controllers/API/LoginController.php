@@ -30,10 +30,16 @@ class LoginController extends Controller
             'password' => Hash::make($request->password)
          ]);
 
-        $token = $user->createToken('auth_token_blog')->plainTextToken;
+        $token = $user->createToken('auth_token_blog');
 
         return response()
-            ->json(['data' => $user,'access_token' => $token, 'token_type' => 'Bearer', ]);
+            ->json([
+                'data' => $user,
+                // 'access_token' => $token, 'token_type' => 'Bearer',
+                'access_token' => $token->plainTextToken,
+                'token_type' => 'Bearer',
+                // 'expired_at' => $token->accessToken->expired_at,
+             ]);
     }
     public function Login(Request $request)
     {
@@ -53,20 +59,48 @@ class LoginController extends Controller
 
         $user = User::where('email', $request['email'])->firstOrFail();
 
-        $token = $user->createToken('auth_token_blog')->plainTextToken;
+        $token = $user->createToken('auth_token_blog');
 
         return response()
-            ->json(['message' => 'Hi '.$user->name.', welcome to home','access_token' => $token, 'token_type' => 'Bearer', ]);
+            ->json([
+                'message' => 'Hi '.$user->name.', welcome to home',
+                // 'access_token' => $token,
+                // 'token_type' => 'Bearer',
+                'access_token' => $token->plainTextToken,
+                'token_type' => 'Bearer',
+                'expired_at' => $token->accessToken->expired_at,
+             ]);
         
     }
     // method for user logout and delete token
     public function logout()
     {
-        auth()->user()->tokens()->delete();
+        // Get user who requested the logout
+        $user = request()->user(); //or Auth::user()
+        // Revoke current user token
+        $user->tokens()->where('id', $user->currentAccessToken()->id)->delete();
 
-        return [
+        return response()->json([
             'message' => 'You have successfully logged out and the token was successfully deleted'
-        ];
+        ]);
+    }
+    // method for kill all user
+    public function kill_all_user()
+    {
+        // Revoke the token that was used to authenticate the current request...
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'You have successfully logged out all users and the token was successfully deleted'
+        ]);
+    }
+    // method for user detail
+    public function profil()
+    {
+        // Get user who requested the logout
+        $user = request()->user(); //or Auth::user()
+
+        return response()->json($user);
     }
     //represh token
     public function token_represh(Request $request) 
@@ -87,8 +121,8 @@ class LoginController extends Controller
             $user_name = Auth::guard('web')->user()->name;
             $token = auth()->user()->createToken('auth_token_blog');
             return response()->json([
-                'message' => 'Hi '.$user_name.', welcome to home',
-                'token' => $token->plainTextToken,
+                'message' => 'Hi '.$user_name.', welcome back',
+                'access_token' => $token->plainTextToken,
                 'token_type' => 'Bearer',
                 'expired_at' => $token->accessToken->expired_at,
             ]);
