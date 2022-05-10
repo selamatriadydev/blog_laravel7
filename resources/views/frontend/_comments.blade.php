@@ -1,4 +1,4 @@
-@forelse ($post->comments as $comment)
+@foreach ($post->comments as $comment)
     <div class="row">
         <div class="col-md-12">
             <div class="card">
@@ -21,17 +21,4 @@
             </div>
         </div>
       </div>
-@empty
-<div class="row">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">  
-            <h4>Not Found!! </h4>
-            </div>
-            <div class="card-body">
-                <p>Sorry! No comment found for this post.</p>
-          </div>
-        </div>
-    </div>
-  </div>
 @endforelse

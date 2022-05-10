@@ -171,26 +171,76 @@ class BlogController extends Controller
     {
         $this->validate($request, ['body' => 'required']);
 
-        $post->comments()->create([
-            'body' => $request->body,
-            'user_id' => auth()->user()->id,
-        ]);
+        // $post->comments()->create([
+        //     'body' => $request->body,
+        //     'user_id' => auth()->user()->id,
+        // ]);
+        if($request->comment_id){
+            $post->comments()->create([
+                'parent_id' => $request->comment_id,
+                'body' => $request->body,
+                'user_id' => auth()->user()->id,
+            ]);
+        }else{
+            $post->comments()->create([
+                'body' => $request->body,
+                'user_id' => auth()->user()->id,
+            ]);
+        }
         return ['succes', 'Comment successfully created'];
     }
+    // public function comment_userss(Request $request, Post $post){
+    //     commentUser::createToken('user_comment');
+    // }
+    // public function store(Request $request)
+    // {
+    //     $comment = new Comment;
+    //     $comment->body = $request->get('comment_body');
+    //     // $comment->parent_id = null;
+    //     $comment->user()->associate($request->user());
+    //     $post = Post::find($request->get('post_id'));
+    //     $post->comments()->save($comment); 
+
+    //     return back();
+    // }
+    // public function replyStore(Request $request)
+    // {
+    //     $reply = new Comment();
+    //     $reply->body = $request->get('comment_body');
+    //     $reply->user()->associate($request->user());
+    //     $reply->parent_id = $request->get('comment_id');
+    //     $post = Post::find($request->get('post_id'));
+
+    //     $post->comments()->save($reply);
+
+    //     return back();
+
+    // }
     public function comment_user_biasa(Request $request, Post $post)
     {
         $this->validate($request, ['body' => 'required']);
         $this->validate($request, ['nama' => 'required']);
         $this->validate($request, ['email' => 'required']);
+        // dd($request);
         //cari user, jika ada ambil id nya
             $commentUser = CommnetUser::where('email', $request->email)->count();
             if($commentUser > 0){
                 $commentUser = CommnetUser::where('email', $request->email)->first();
                 $userComment = $commentUser->id;
-                $post->comments()->create([
-                    'body' => $request->body,
-                    'comment_user_id' => $userComment,
-                ]);
+                if($request->comment_id){
+                    $post->comments()->create([
+                        'parent_id' => $request->comment_id,
+                        'body' => $request->body,
+                        'comment_user_id' => $userComment,
+                    ]);
+                }else{
+                    $post->comments()->create([
+                        'body' => $request->body,
+                        'comment_user_id' => $userComment,
+                    ]);
+                }
+                // $token_expired_cek = $commentUser->token;
+                // $token = $commentUser->createToken('user_comment')->plainTextToken;
                 return ['succes' => 'true','slug'=>$post->slug,'message'=> 'Comment successfully created'];
             }else{
                 //buat user baru
@@ -200,10 +250,19 @@ class BlogController extends Controller
                 $userCommentCreate->website = $request->website ? $request->website : '';
                 $userCommentCreate->save();
                 $userComment = $userCommentCreate->id;
-                $post->comments()->create([
-                    'body' => $request->body,
-                    'comment_user_id' => $userComment,
-                ]);
+                if($request->comment_id){
+                    $post->comments()->create([
+                        'parent_id' => $request->comment_id,
+                        'body' => $request->body,
+                        'comment_user_id' => $userComment,
+                    ]);
+                }else{
+                    $post->comments()->create([
+                        'body' => $request->body,
+                        'comment_user_id' => $userComment,
+                    ]);
+                }
+                // $token = $commentUser->createToken('user_comment')->plainTextToken;
                 return ['succes' => 'true','slug'=>$post->slug,'message'=> 'Comment successfully created'];
             }
 

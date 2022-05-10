@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use App\Post;
 use App\User;
+use App\Comment;
 class Comment extends Model
 {
     protected $fillable = [
@@ -12,7 +13,8 @@ class Comment extends Model
         'body',
         'user_id',
         'post_id',
-        'comment_user_id'
+        'comment_user_id',
+        'parent_id'
     ];
     protected $appends = ['user_admin', 'user_pengunjung', 'user_comment', 'waktu_hitung'];
 
@@ -44,6 +46,11 @@ class Comment extends Model
     {
         // return $this->belongsTo(User::class);
         return $this->belongsTo('App\CommnetUser', 'comment_user_id', 'id');
+    }
+
+    public function replies()
+    {
+       return $this->hasMany(Comment::class, 'parent_id');
     }
 
     public function getUserAdminAttribute()
@@ -81,4 +88,7 @@ class Comment extends Model
         $get_name = $this->created_at->diffForHumans();
         return $get_name;
     }
+    // public function replies(){
+    //     return $this->hasMany(Comment::class,'reply_id','id')
+    // }
 }

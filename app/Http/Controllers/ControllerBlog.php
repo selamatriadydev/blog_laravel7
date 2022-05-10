@@ -131,10 +131,22 @@ class ControllerBlog extends Controller
             if($commentUser > 0){
                 $commentUser = CommnetUser::where('email', $request->email)->first();
                 $userComment = $commentUser->id;
-                $post->comments()->create([
-                    'body' => $request->body,
-                    'comment_user_id' => $userComment,
-                ]);
+                // $post->comments()->create([
+                //     'body' => $request->body,
+                //     'comment_user_id' => $userComment,
+                // ]);
+                if($request->comment_id){
+                    $post->comments()->create([
+                        'parent_id' => $request->comment_id,
+                        'body' => $request->body,
+                        'comment_user_id' => $userComment,
+                    ]);
+                }else{
+                    $post->comments()->create([
+                        'body' => $request->body,
+                        'comment_user_id' => $userComment,
+                    ]);
+                }
                 flash('Comment successfully created')->success();
                 return redirect("/blog/{$post->slug}?userComment={$userComment}");
             }else{
@@ -145,10 +157,22 @@ class ControllerBlog extends Controller
                 $userCommentCreate->website = $request->website ? $request->website : '';
                 $userCommentCreate->save();
                 $userComment = $userCommentCreate->id;
-                $post->comments()->create([
-                    'body' => $request->body,
-                    'comment_user_id' => $userComment,
-                ]);
+                // $post->comments()->create([
+                //     'body' => $request->body,
+                //     'comment_user_id' => $userComment,
+                // ]);
+                if($request->comment_id){
+                    $post->comments()->create([
+                        'parent_id' => $request->comment_id,
+                        'body' => $request->body,
+                        'comment_user_id' => $userComment,
+                    ]);
+                }else{
+                    $post->comments()->create([
+                        'body' => $request->body,
+                        'comment_user_id' => $userComment,
+                    ]);
+                }
                 flash('Comment successfully created')->success();
                 return redirect("/blog/{$post->slug}?userComment={$userComment}");
             }
